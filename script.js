@@ -87,3 +87,38 @@ weatherDiv.innerHTML = `
 `;
 
 }
+async function getWeather(city){
+
+try{
+
+const geoURL =
+`https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+
+const geoResponse = await fetch(geoURL);
+const geoData = await geoResponse.json();
+
+if(!geoData.results){
+weatherDiv.innerHTML = "City not found";
+return;
+}
+
+const lat = geoData.results[0].latitude;
+const lon = geoData.results[0].longitude;
+
+const weatherURL =
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+
+const weatherResponse = await fetch(weatherURL);
+const weatherData = await weatherResponse.json();
+
+displayWeather(city, weatherData.current_weather);
+
+// ADD THIS LINE HERE
+saveHistory(city);
+
+}
+catch(error){
+weatherDiv.innerHTML = "Network Error";
+}
+
+}
