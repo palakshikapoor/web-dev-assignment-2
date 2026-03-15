@@ -4,10 +4,13 @@ const weatherDiv = document.getElementById("weather");
 const historyDiv = document.getElementById("history");
 const consoleBox = document.getElementById("console");
 
-console.log("Weather Tracker Loaded");
-function log(message){
-consoleBox.textContent += message + "\n";
+function log(msg){
+consoleBox.textContent += msg + "\n";
 }
+
+searchBtn.addEventListener("click", ()=>{
+
+consoleBox.textContent = "";
 
 log("Sync Start");
 
@@ -20,105 +23,106 @@ log("Promise.then (Microtask)");
 });
 
 log("Sync End");
-searchBtn.addEventListener("click", ()=>{
 
 const city = cityInput.value.trim();
 
-if(city === ""){
-weatherDiv.innerHTML = "Please enter a city name";
+if(city===""){
+weatherDiv.innerHTML="Enter city name";
 return;
 }
 
 getWeather(city);
 
 });
+
+
 async function getWeather(city){
 
 log("[Async] Start fetching");
 
-const geoURL =
-`https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
-
-const geoResponse = await fetch(geoURL);
-const geoData = await geoResponse.json();
-
-console.log(geoData);
-
-}
-async function getWeather(city){
-
 try{
 
-const geoURL =
-`https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+const geoResponse =
+await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
 
-const geoResponse = await fetch(geoURL);
 const geoData = await geoResponse.json();
 
 if(!geoData.results){
-weatherDiv.innerHTML = "City not found";
+weatherDiv.innerHTML="City not found";
 return;
 }
 
 const lat = geoData.results[0].latitude;
 const lon = geoData.results[0].longitude;
 
-const weatherURL =
-`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+const weatherResponse =
+await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
 
-const weatherResponse = await fetch(weatherURL);
 const weatherData = await weatherResponse.json();
 
 displayWeather(city, weatherData.current_weather);
 
+saveHistory(city);
+
+log("[Async] Data received");
+
 }
 catch(error){
-weatherDiv.innerHTML = "Network Error";
+
+weatherDiv.innerHTML="Network Error";
+
 }
 
 }
+
+
 function displayWeather(city,data){
 
 weatherDiv.innerHTML = `
 <p><b>City:</b> ${city}</p>
-<p><b>Temperature:</b> ${data.temperature} °C</p>
-<p><b>Wind Speed:</b> ${data.windspeed} km/h</p>
-<p><b>Weather Code:</b> ${data.weathercode}</p>
+<p><b>Temp:</b> ${data.temperature} °C</p>
+<p><b>Wind:</b> ${data.windspeed} km/h</p>
 `;
 
 }
-async function getWeather(city){
 
-try{
 
-const geoURL =
-`https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+function saveHistory(city){
 
-const geoResponse = await fetch(geoURL);
-const geoData = await geoResponse.json();
+let history = JSON.parse(localStorage.getItem("cities")) || [];
 
-if(!geoData.results){
-weatherDiv.innerHTML = "City not found";
-return;
+if(!history.includes(city)){
+history.push(city);
 }
 
-const lat = geoData.results[0].latitude;
-const lon = geoData.results[0].longitude;
+localStorage.setItem("cities", JSON.stringify(history));
 
-const weatherURL =
-`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-
-const weatherResponse = await fetch(weatherURL);
-const weatherData = await weatherResponse.json();
-
-displayWeather(city, weatherData.current_weather);
-
-// ADD THIS LINE HERE
-saveHistory(city);
+loadHistory();
 
 }
-catch(error){
-weatherDiv.innerHTML = "Network Error";
-}
+
+
+function loadHistory(){
+
+historyDiv.innerHTML="";
+
+let history = JSON.parse(localStorage.getItem("cities")) || [];
+
+history.forEach(city=>{
+
+let btn=document.createElement("button");
+
+btn.textContent=city;
+btn.className="historyBtn";
+
+btn.onclick=()=>{
+getWeather(city);
+};
+
+historyDiv.appendChild(btn);
+
+});
 
 }
+
+window.onload = loadHistory;
