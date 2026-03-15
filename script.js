@@ -32,3 +32,16 @@ return;
 getWeather(city);
 
 });
+async function getWeather(city){
+
+log("[Async] Start fetching");
+
+const geoURL =
+`https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+
+const geoResponse = await fetch(geoURL);
+const geoData = await geoResponse.json();
+
+console.log(geoData);
+
+}
