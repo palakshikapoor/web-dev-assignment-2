@@ -20,3 +20,15 @@ log("Promise.then (Microtask)");
 });
 
 log("Sync End");
+searchBtn.addEventListener("click", ()=>{
+
+const city = cityInput.value.trim();
+
+if(city === ""){
+weatherDiv.innerHTML = "Please enter a city name";
+return;
+}
+
+getWeather(city);
+
+});
