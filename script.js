@@ -77,3 +77,13 @@ weatherDiv.innerHTML = "Network Error";
 }
 
 }
+function displayWeather(city,data){
+
+weatherDiv.innerHTML = `
+<p><b>City:</b> ${city}</p>
+<p><b>Temperature:</b> ${data.temperature} °C</p>
+<p><b>Wind Speed:</b> ${data.windspeed} km/h</p>
+<p><b>Weather Code:</b> ${data.weathercode}</p>
+`;
+
+}
